@@ -20,6 +20,10 @@ export default function MovementForm({ assets, people }) {
 
     const [activeTerms, setActiveTerms] = useState([]);
 
+    // Preview Logic State
+    const [previewMovements, setPreviewMovements] = useState(null); // Array of movements found by search
+    const [selectedPreviewIds, setSelectedPreviewIds] = useState([]); // IDs of movements user checked in preview
+
     // Load active terms when switching to IN    
     // Effect hook manages the fetch
 
@@ -110,64 +114,9 @@ export default function MovementForm({ assets, people }) {
                 return;
             }
 
-            // Validation: Check if found items belong to the same person as already selected items
-            const newPersonId = movements[0].personId;
-            const newPersonName = movements[0].person.name;
-
-            // Find current person ID from the form (either via selected assets or current selection)
-            // Ideally, we should check against the currently selected items' owner if any exists.
-
-            // Let's assume the first item in selectedAssets (if any) defines the "Owner" of the current transaction.
-            // We need to fetch the owner of items in selectedAssets.
-            // PROBLEM: selectedAssets currently only stores Asset objects, not the Movement/Person info history.
-            // SOLUTION: When adding from 'active', we should attach the personId to the asset object or rely on form state.
-
-            // However, the simplest check is the Form's 'personId' field which acts as the 'Target Person'.
-            const currentPersonSelect = document.querySelector('select[name="personId"]');
-            const currentPersonId = currentPersonSelect ? parseInt(currentPersonSelect.value) : null;
-
-            if (selectedAssets.length > 0 && currentPersonId && currentPersonId !== newPersonId) {
-                const proceed = confirm(`Atenção: Os itens encontrados pertencem a ${newPersonName}, mas você já tem itens na lista para outra pessoa. \n\nDeseja LIMPAR a lista atual e usar apenas os novos itens de ${newPersonName}?`);
-                if (!proceed) {
-                    setLoading(false);
-                    return;
-                }
-                // Clear list if user agrees
-                setSelectedAssets([]);
-            }
-
-            // Extract unique assets
-            const assetsFound = movements.map(m => m.asset);
-            // Filter duplicates if already selected (though we might have just cleared)
-            const newAssets = assetsFound.filter(a => !selectedAssets.find(sa => sa.id === a.id));
-
-            if (newAssets.length === 0 && selectedAssets.length > 0) {
-                // If we didn't clear and found duplicates
-                alert('Os itens encontrados já estão na lista.');
-            } else {
-                if (selectedAssets.length > 0 && currentPersonId === newPersonId) {
-                    // Adding more items from same person
-                    setSelectedAssets([...selectedAssets, ...newAssets]);
-                } else {
-                    // New list (cleared or start)
-                    setSelectedAssets(newAssets);
-                }
-            }
-
-            // Auto-fill context from the FIRST movement found
-            const examplar = movements[0];
-            if (examplar) {
-                setIsNewPerson(false);
-                const personSelect = document.querySelector('select[name="personId"]');
-                if (personSelect) personSelect.value = examplar.personId;
-
-                const originInput = document.querySelector('input[name="originSector"]');
-                const destInput = document.querySelector('input[name="destSector"]');
-
-                // Swap sectors: Logic -> Inverse return
-                if (originInput) originInput.value = examplar.destSector || '';
-                if (destInput) destInput.value = examplar.originSector || '';
-            }
+            // Store found movements in preview state for user selection
+            setPreviewMovements(movements);
+            setSelectedPreviewIds([]); // Reset selection
 
         } catch (e) {
             console.error(e);
@@ -233,7 +182,6 @@ export default function MovementForm({ assets, people }) {
     return (
         <form onSubmit={handleSubmit}>
 
-            {/* Load from Term / Active Search Section */}
             {type === 'IN' && (
                 <div className="card" style={{ marginBottom: '1.5rem', background: 'var(--gray-50)', border: '1px solid var(--gray-200)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -241,58 +189,186 @@ export default function MovementForm({ assets, people }) {
                         <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: 'var(--rf-gold)', color: 'white', borderRadius: '4px', fontWeight: 'bold' }}>Devolução</span>
                     </div>
 
-                    <p className="text-muted text-sm" style={{ marginBottom: '1rem' }}>
-                        Busque itens em aberto pelo número do termo ou pela pessoa responsável.
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'end' }}>
-                        <div>
-                            <label className="form-label">Buscar por Termo</label>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <select
-                                    id="termSearchInput"
-                                    className="form-select"
-                                >
-                                    <option value="">Selecione um termo...</option>
-                                    {activeTerms.map(t => (
-                                        <option key={t.label} value={t.label}>
-                                            {t.label} - {t.personName.split(' ')[0]}...
-                                        </option>
-                                    ))}
-                                </select>
+                    {!previewMovements ? (
+                        <>
+                            <p className="text-muted text-sm" style={{ marginBottom: '1rem' }}>
+                                Busque itens em aberto pelo número do termo ou pela pessoa responsável.
+                            </p>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'end' }}>
+                                <div>
+                                    <label className="form-label">Buscar por Termo</label>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <select
+                                            id="termSearchInput"
+                                            className="form-select"
+                                        >
+                                            <option value="">Selecione um termo...</option>
+                                            {activeTerms.map(t => (
+                                                <option key={t.label} value={t.label}>
+                                                    {t.label} - {t.personName.split(' ')[0]}...
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary"
+                                            onClick={async () => {
+                                                const term = document.getElementById('termSearchInput').value;
+                                                if (!term) return alert('Selecione um termo');
+                                                await handleSearchActive(term, null);
+                                            }}
+                                        >
+                                            Buscar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="form-label">Ou Buscar por Pessoa</label>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <select id="personSearchSelect" className="form-select">
+                                            <option value="">Selecione...</option>
+                                            {people.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                        </select>
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary"
+                                            onClick={async () => {
+                                                const pid = document.getElementById('personSearchSelect').value;
+                                                if (!pid) return alert('Selecione uma pessoa');
+                                                await handleSearchActive(null, pid);
+                                            }}
+                                        >
+                                            Buscar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div style={{ animation: 'fadeIn 0.3s ease' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h4 style={{ fontSize: '1rem', fontWeight: 'bold' }}>Selecione os itens para devolver:</h4>
+                                <button type="button" onClick={() => { setPreviewMovements(null); setSelectedPreviewIds([]); }} className="btn btn-outline" style={{ fontSize: '0.8rem', padding: '0.3rem 0.8rem' }}>
+                                    Cancelar / Nova Busca
+                                </button>
+                            </div>
+
+                            <div style={{ maxHeight: '300px', overflowY: 'auto', background: 'white', borderRadius: 'var(--radius-md)', border: '1px solid var(--gray-300)' }}>
+                                {Object.entries(
+                                    previewMovements.reduce((acc, m) => {
+                                        const key = `${m.termYear}/${m.termNumber}`;
+                                        if (!acc[key]) acc[key] = [];
+                                        acc[key].push(m);
+                                        return acc;
+                                    }, {})
+                                ).map(([term, items]) => (
+                                    <div key={term} style={{ borderBottom: '1px solid var(--gray-200)' }}>
+                                        <div style={{ padding: '0.75rem', background: 'var(--gray-100)', fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--gray-700)' }}>
+                                            Termo {term} <span style={{ fontWeight: 'normal' }}>({items[0].person?.name})</span>
+                                        </div>
+                                        <div>
+                                            {items.map(m => {
+                                                const isSelected = selectedPreviewIds.includes(m.id);
+                                                // Disable if already in main cart (avoid duplicates)
+                                                const isAlreadyInCart = selectedAssets.some(sa => sa.id === m.assetId);
+
+                                                return (
+                                                    <div key={m.id}
+                                                        onClick={() => {
+                                                            if (isAlreadyInCart) return;
+                                                            if (isSelected) {
+                                                                setSelectedPreviewIds(prev => prev.filter(id => id !== m.id));
+                                                            } else {
+                                                                setSelectedPreviewIds(prev => [...prev, m.id]);
+                                                            }
+                                                        }}
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '1rem',
+                                                            padding: '0.75rem',
+                                                            cursor: isAlreadyInCart ? 'default' : 'pointer',
+                                                            backgroundColor: isSelected ? 'var(--status-success-bg)' : 'transparent',
+                                                            opacity: isAlreadyInCart ? 0.5 : 1
+                                                        }}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isSelected || isAlreadyInCart}
+                                                            readOnly
+                                                            style={{ transform: 'scale(1.2)', cursor: 'pointer' }}
+                                                            disabled={isAlreadyInCart}
+                                                        />
+                                                        <div>
+                                                            <div style={{ fontWeight: '500' }}>{m.asset.code} - {m.asset.description}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--gray-600)' }}>Origem: {m.originSector} ➝ Destino: {m.destSector}</div>
+                                                        </div>
+                                                        {isAlreadyInCart && <span style={{ fontSize: '0.75rem', color: 'var(--gray-600)', marginLeft: 'auto' }}>(Já na lista)</span>}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                <span style={{ alignSelf: 'center', fontSize: '0.9rem', color: 'var(--gray-600)' }}>
+                                    {selectedPreviewIds.length} itens selecionados
+                                </span>
                                 <button
                                     type="button"
-                                    className="btn btn-secondary"
-                                    onClick={async () => {
-                                        const term = document.getElementById('termSearchInput').value;
-                                        if (!term) return alert('Selecione um termo');
-                                        await handleSearchActive(term, null);
+                                    className="btn btn-primary"
+                                    disabled={selectedPreviewIds.length === 0}
+                                    onClick={() => {
+                                        // Process selection
+                                        const selectedItems = previewMovements.filter(m => selectedPreviewIds.includes(m.id));
+
+                                        // Logic to validate person consistency
+                                        const newPersonId = selectedItems[0]?.personId;
+                                        const currentPersonSelect = document.querySelector('select[name="personId"]');
+                                        const currentPersonId = currentPersonSelect ? parseInt(currentPersonSelect.value) : null;
+
+                                        if (selectedAssets.length > 0 && currentPersonId && currentPersonId !== newPersonId) {
+                                            const proceed = confirm(`Você está tentando adicionar itens de OUTRA pessoa. Deseja limpar a lista atual?`);
+                                            if (!proceed) return;
+                                            setSelectedAssets([]);
+                                        }
+
+                                        // Add to main list
+                                        const assetsToAdd = selectedItems.map(m => m.asset);
+                                        // If clean start, set Assets
+                                        if (selectedAssets.length === 0 || (currentPersonId && currentPersonId !== newPersonId)) {
+                                            setSelectedAssets(assetsToAdd);
+
+                                            // Auto-fill context from FIRST selected item
+                                            if (selectedItems.length > 0) {
+                                                const examplar = selectedItems[0];
+                                                setIsNewPerson(false);
+                                                const personSelect = document.querySelector('select[name="personId"]');
+                                                if (personSelect) personSelect.value = examplar.personId;
+                                                const originInput = document.querySelector('input[name="originSector"]');
+                                                const destInput = document.querySelector('input[name="destSector"]');
+                                                if (originInput) originInput.value = examplar.destSector || '';
+                                                if (destInput) destInput.value = examplar.originSector || '';
+                                            }
+
+                                        } else {
+                                            // Append
+                                            const uniqueNew = assetsToAdd.filter(na => !selectedAssets.find(sa => sa.id === na.id));
+                                            setSelectedAssets([...selectedAssets, ...uniqueNew]);
+                                        }
+
+                                        // Close preview
+                                        setPreviewMovements(null);
+                                        setSelectedPreviewIds([]);
                                     }}
                                 >
-                                    Buscar
+                                    Confirmar e Adicionar à Lista
                                 </button>
                             </div>
                         </div>
-                        <div>
-                            <label className="form-label">Ou Buscar por Pessoa</label>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <select id="personSearchSelect" className="form-select">
-                                    <option value="">Selecione...</option>
-                                    {people.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                </select>
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    onClick={async () => {
-                                        const pid = document.getElementById('personSearchSelect').value;
-                                        if (!pid) return alert('Selecione uma pessoa');
-                                        await handleSearchActive(null, pid);
-                                    }}
-                                >
-                                    Buscar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    )}
                 </div>
             )}
 
