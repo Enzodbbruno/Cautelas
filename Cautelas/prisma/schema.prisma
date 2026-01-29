@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Asset {
+  id          Int        @id @default(autoincrement())
+  code        String     @unique // "Patrimonio"
+  description String
+  status      String     @default("AVAILABLE") // AVAILABLE, IN_USE, MAINTENANCE
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  movements   Movement[]
+}
+
+model Person {
+  id        Int        @id @default(autoincrement())
+  name      String
+  cpf       String?    @unique
+  sector    String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  movements Movement[]
+}
+
+model Movement {
+  id           Int       @id @default(autoincrement())
+  type         String    // "OUT" (Retirada) or "IN" (Devolução)
+  
+  assetId      Int
+  asset        Asset     @relation(fields: [assetId], references: [id])
+  
+  personId     Int
+  person       Person    @relation(fields: [personId], references: [id])
+  
+  termNumber   Int       // Sequential number of the term
+  termYear     Int       // Year of the term
+  
+  originSector String?
+  destSector   String?
+  
+  observation  String?
+  
+  isActive     Boolean   @default(true) // If true, this is the current active state of the asset
+  
+  movementDate DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+}
