@@ -92,31 +92,54 @@ export default function MovementForm({ assets, people }) {
                 return;
             }
 
+            // Validation: Check if found items belong to the same person as already selected items
+            const newPersonId = movements[0].personId;
+            const newPersonName = movements[0].person.name;
+
+            // Find current person ID from the form (either via selected assets or current selection)
+            // Ideally, we should check against the currently selected items' owner if any exists.
+
+            // Let's assume the first item in selectedAssets (if any) defines the "Owner" of the current transaction.
+            // We need to fetch the owner of items in selectedAssets.
+            // PROBLEM: selectedAssets currently only stores Asset objects, not the Movement/Person info history.
+            // SOLUTION: When adding from 'active', we should attach the personId to the asset object or rely on form state.
+
+            // However, the simplest check is the Form's 'personId' field which acts as the 'Target Person'.
+            const currentPersonSelect = document.querySelector('select[name="personId"]');
+            const currentPersonId = currentPersonSelect ? parseInt(currentPersonSelect.value) : null;
+
+            if (selectedAssets.length > 0 && currentPersonId && currentPersonId !== newPersonId) {
+                const proceed = confirm(`Atenção: Os itens encontrados pertencem a ${newPersonName}, mas você já tem itens na lista para outra pessoa. \n\nDeseja LIMPAR a lista atual e usar apenas os novos itens de ${newPersonName}?`);
+                if (!proceed) {
+                    setLoading(false);
+                    return;
+                }
+                // Clear list if user agrees
+                setSelectedAssets([]);
+            }
+
             // Extract unique assets
             const assetsFound = movements.map(m => m.asset);
-            // Filter duplicates if already selected
+            // Filter duplicates if already selected (though we might have just cleared)
             const newAssets = assetsFound.filter(a => !selectedAssets.find(sa => sa.id === a.id));
 
-            if (newAssets.length === 0) {
+            if (newAssets.length === 0 && selectedAssets.length > 0) {
+                // If we didn't clear and found duplicates
                 alert('Os itens encontrados já estão na lista.');
             } else {
-                setSelectedAssets([...selectedAssets, ...newAssets]);
+                if (selectedAssets.length > 0 && currentPersonId === newPersonId) {
+                    // Adding more items from same person
+                    setSelectedAssets([...selectedAssets, ...newAssets]);
+                } else {
+                    // New list (cleared or start)
+                    setSelectedAssets(newAssets);
+                }
             }
 
             // Auto-fill context from the FIRST movement found
             const examplar = movements[0];
             if (examplar) {
-                // Set Person if not set or if simple overwrite
-                // We access the form utilizing state or refs would be better, but simpler here:
-                // We'll update state if we had it for formData, but we rely on native form submit.
-                // However, we have `isNewPerson` state. Let's toggle it off.
                 setIsNewPerson(false);
-                // We can't easily change the SELECT value uncontrolled unless we use state for it or DOM manipulation.
-                // Let's add a state for personId to control the select.
-                // But wait, the original code used uncontrolled select `name="personId"`.
-                // I need to change the Select to be controlled to auto-select.
-
-                // Let's set the input values directly via DOM for now to avoid refactoring the whole form to controlled components just for this.
                 const personSelect = document.querySelector('select[name="personId"]');
                 if (personSelect) personSelect.value = examplar.personId;
 
@@ -124,8 +147,8 @@ export default function MovementForm({ assets, people }) {
                 const destInput = document.querySelector('input[name="destSector"]');
 
                 // Swap sectors: Logic -> Inverse return
-                if (originInput) originInput.value = examplar.destSector || ''; // Currently at dest, so coming FROM there
-                if (destInput) destInput.value = examplar.originSector || ''; // Going back to origin
+                if (originInput) originInput.value = examplar.destSector || '';
+                if (destInput) destInput.value = examplar.originSector || '';
             }
 
         } catch (e) {
@@ -194,13 +217,17 @@ export default function MovementForm({ assets, people }) {
 
             {/* Load from Term / Active Search Section */}
             {type === 'IN' && (
-                <div className="card" style={{ marginBottom: '1.5rem', border: '1px solid var(--rf-gold)', background: '#fffcf0' }}>
-                    <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--rf-gold-hover)' }}>Carregar Itens de Cautela Anterior</h3>
+                <div className="card" style={{ marginBottom: '1.5rem', background: 'var(--gray-50)', border: '1px solid var(--gray-200)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                        <h3 className="text-lg font-bold" style={{ color: 'var(--gray-700)' }}>Carregar Itens de Cautela Anterior</h3>
+                        <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: 'var(--rf-gold)', color: 'white', borderRadius: '4px', fontWeight: 'bold' }}>Devolução</span>
+                    </div>
+
                     <p className="text-muted text-sm" style={{ marginBottom: '1rem' }}>
-                        Digite o número do termo (ex: 2026/1 ou apenas 1) ou selecione a Pessoa abaixo para buscar itens em aberto.
+                        Busque itens em aberto pelo número do termo ou pela pessoa responsável.
                     </p>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
-                        <div style={{ flex: 1 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'end' }}>
+                        <div>
                             <label className="form-label">Buscar por Termo</label>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <input
@@ -217,11 +244,11 @@ export default function MovementForm({ assets, people }) {
                                         await handleSearchActive(term, null);
                                     }}
                                 >
-                                    Buscar Termo
+                                    Buscar
                                 </button>
                             </div>
                         </div>
-                        <div style={{ flex: 1 }}>
+                        <div>
                             <label className="form-label">Ou Buscar por Pessoa</label>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <select id="personSearchSelect" className="form-select">
@@ -237,7 +264,7 @@ export default function MovementForm({ assets, people }) {
                                         await handleSearchActive(null, pid);
                                     }}
                                 >
-                                    Buscar Itens
+                                    Buscar
                                 </button>
                             </div>
                         </div>

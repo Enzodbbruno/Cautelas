@@ -16,13 +16,23 @@ export default function RootLayout({ children }) {
       <body>
         <header className="main-header">
           <div className="container header-inner">
-            <div className="logo-group">
-              <div className="logo-icon">
-                <span>RF</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ width: '40px', height: '40px', position: 'relative' }}>
+                {/* Logo da Receita Federal (SVG) - Filter applied to make it white */}
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/b/b3/Logo_Receita_Federal_do_Brasil.svg"
+                  alt="Receita Federal"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    filter: 'brightness(0) invert(1)'
+                  }}
+                />
               </div>
-              <div className="brand-text">
-                <h1>Receita Federal</h1>
-                <span>Gestão de Cautelas</span>
+              <div>
+                <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', lineHeight: '1.2' }}>Receita Federal</h1>
+                <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>Sistema de Gestão de Cautelas</p>
               </div>
             </div>
             <a href="/" className="btn btn-secondary no-print" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>
