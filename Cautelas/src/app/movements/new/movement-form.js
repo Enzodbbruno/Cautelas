@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function MovementForm({ assets, people }) {
@@ -17,6 +17,28 @@ export default function MovementForm({ assets, people }) {
 
     const [isNewPerson, setIsNewPerson] = useState(false);
     const [newPersonData, setNewPersonData] = useState({ name: '', cpf: '', sector: '' });
+
+    const [activeTerms, setActiveTerms] = useState([]);
+
+    // Load active terms when switching to IN
+    import { useEffect } from 'react'; // Ensure this is imported if not already, wait, I can't add imports mid-body. 
+    // I should check imports. 'useEffect' is missing in imports. I need to add it at the top.
+    // I will use a separate Replace call for the import.
+
+    // Actually, I can use a simpler approach: fetch on focus or use a separate effect hook below.
+    // Wait, I can't add hooks conditionally (inside `if`).
+    // I will add the effect hook at top level.
+
+    useEffect(() => {
+        if (type === 'IN') {
+            fetch('/api/movements/terms/active')
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) setActiveTerms(data);
+                })
+                .catch(err => console.error('Failed to load terms', err));
+        }
+    }, [type]);
 
     // Filter available assets based on type AND exclude already selected ones
     const filteredAssets = assets.filter(asset => {
@@ -230,17 +252,23 @@ export default function MovementForm({ assets, people }) {
                         <div>
                             <label className="form-label">Buscar por Termo</label>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <input
-                                    placeholder="Ex: 2026/0001"
-                                    className="form-input"
+                                <select
                                     id="termSearchInput"
-                                />
+                                    className="form-select"
+                                >
+                                    <option value="">Selecione um termo...</option>
+                                    {activeTerms.map(t => (
+                                        <option key={t.label} value={t.label}>
+                                            {t.label} - {t.personName.split(' ')[0]}...
+                                        </option>
+                                    ))}
+                                </select>
                                 <button
                                     type="button"
                                     className="btn btn-secondary"
                                     onClick={async () => {
                                         const term = document.getElementById('termSearchInput').value;
-                                        if (!term) return alert('Digite o número do termo');
+                                        if (!term) return alert('Selecione um termo');
                                         await handleSearchActive(term, null);
                                     }}
                                 >
