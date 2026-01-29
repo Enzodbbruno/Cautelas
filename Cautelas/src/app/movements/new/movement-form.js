@@ -25,9 +25,11 @@ export default function MovementForm({ assets, people }) {
 
     useEffect(() => {
         if (type === 'IN') {
+            console.log('Fetching active terms...');
             fetch('/api/movements/terms/active')
                 .then(res => res.json())
                 .then(data => {
+                    console.log('Active terms loaded:', data);
                     if (Array.isArray(data)) setActiveTerms(data);
                 })
                 .catch(err => console.error('Failed to load terms', err));
