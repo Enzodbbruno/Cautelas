@@ -5,7 +5,7 @@ import ReportFilters from './report-filters';
 export const dynamic = 'force-dynamic';
 
 async function getMovements(searchParams) {
-    const { personId, assetId, termNumber, year } = await searchParams;
+    const { personId, assetId, termNumber, year } = searchParams;
 
     const where = {};
 
@@ -44,7 +44,8 @@ async function getOptions() {
 }
 
 export default async function ReportsPage({ searchParams }) {
-    const movements = await getMovements(searchParams);
+    const resolvedSearchParams = await searchParams;
+    const movements = await getMovements(resolvedSearchParams);
     const { people, assets } = await getOptions();
 
     return (
@@ -52,7 +53,7 @@ export default async function ReportsPage({ searchParams }) {
             <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Relatório de Movimentações</h2>
 
             {/* Filter Form - Client Component */}
-            <ReportFilters people={people} assets={assets} initialParams={searchParams} />
+            <ReportFilters people={people} assets={assets} initialParams={resolvedSearchParams} />
 
             <div className="card">
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
