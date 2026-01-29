@@ -80,9 +80,10 @@ a {
 /* Layout */
 .container {
   width: 100%;
-  max-width: 1400px;
+  max-width: 95%;
+  /* Fluid width to adapt to any screen size */
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
 }
 
 .main-content {

@@ -20,14 +20,8 @@ export default function MovementForm({ assets, people }) {
 
     const [activeTerms, setActiveTerms] = useState([]);
 
-    // Load active terms when switching to IN
-    import { useEffect } from 'react'; // Ensure this is imported if not already, wait, I can't add imports mid-body. 
-    // I should check imports. 'useEffect' is missing in imports. I need to add it at the top.
-    // I will use a separate Replace call for the import.
-
-    // Actually, I can use a simpler approach: fetch on focus or use a separate effect hook below.
-    // Wait, I can't add hooks conditionally (inside `if`).
-    // I will add the effect hook at top level.
+    // Load active terms when switching to IN    
+    // Effect hook manages the fetch
 
     useEffect(() => {
         if (type === 'IN') {
