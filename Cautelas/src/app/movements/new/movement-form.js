@@ -74,6 +74,68 @@ export default function MovementForm({ assets, people }) {
         }
     };
 
+    const handleSearchActive = async (term, personId) => {
+        setLoading(true);
+        try {
+            let url = '/api/movements/active?';
+            if (term) url += `term=${term}`;
+            if (personId) url += `personId=${personId}`;
+
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Erro ao buscar itens');
+
+            const movements = await res.json();
+
+            if (movements.length === 0) {
+                alert('Nenhum item em aberto encontrado com esses critérios.');
+                setLoading(false);
+                return;
+            }
+
+            // Extract unique assets
+            const assetsFound = movements.map(m => m.asset);
+            // Filter duplicates if already selected
+            const newAssets = assetsFound.filter(a => !selectedAssets.find(sa => sa.id === a.id));
+
+            if (newAssets.length === 0) {
+                alert('Os itens encontrados já estão na lista.');
+            } else {
+                setSelectedAssets([...selectedAssets, ...newAssets]);
+            }
+
+            // Auto-fill context from the FIRST movement found
+            const examplar = movements[0];
+            if (examplar) {
+                // Set Person if not set or if simple overwrite
+                // We access the form utilizing state or refs would be better, but simpler here:
+                // We'll update state if we had it for formData, but we rely on native form submit.
+                // However, we have `isNewPerson` state. Let's toggle it off.
+                setIsNewPerson(false);
+                // We can't easily change the SELECT value uncontrolled unless we use state for it or DOM manipulation.
+                // Let's add a state for personId to control the select.
+                // But wait, the original code used uncontrolled select `name="personId"`.
+                // I need to change the Select to be controlled to auto-select.
+
+                // Let's set the input values directly via DOM for now to avoid refactoring the whole form to controlled components just for this.
+                const personSelect = document.querySelector('select[name="personId"]');
+                if (personSelect) personSelect.value = examplar.personId;
+
+                const originInput = document.querySelector('input[name="originSector"]');
+                const destInput = document.querySelector('input[name="destSector"]');
+
+                // Swap sectors: Logic -> Inverse return
+                if (originInput) originInput.value = examplar.destSector || ''; // Currently at dest, so coming FROM there
+                if (destInput) destInput.value = examplar.originSector || ''; // Going back to origin
+            }
+
+        } catch (e) {
+            console.error(e);
+            alert('Erro ao buscar dados.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     async function handleSubmit(e) {
         e.preventDefault();
         if (selectedAssets.length === 0) {
@@ -129,6 +191,59 @@ export default function MovementForm({ assets, people }) {
 
     return (
         <form onSubmit={handleSubmit}>
+
+            {/* Load from Term / Active Search Section */}
+            {type === 'IN' && (
+                <div className="card" style={{ marginBottom: '1.5rem', border: '1px solid var(--rf-gold)', background: '#fffcf0' }}>
+                    <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--rf-gold-hover)' }}>Carregar Itens de Cautela Anterior</h3>
+                    <p className="text-muted text-sm" style={{ marginBottom: '1rem' }}>
+                        Digite o número do termo (ex: 2026/1 ou apenas 1) ou selecione a Pessoa abaixo para buscar itens em aberto.
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+                        <div style={{ flex: 1 }}>
+                            <label className="form-label">Buscar por Termo</label>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <input
+                                    placeholder="Ex: 2026/0001"
+                                    className="form-input"
+                                    id="termSearchInput"
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={async () => {
+                                        const term = document.getElementById('termSearchInput').value;
+                                        if (!term) return alert('Digite o número do termo');
+                                        await handleSearchActive(term, null);
+                                    }}
+                                >
+                                    Buscar Termo
+                                </button>
+                            </div>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label className="form-label">Ou Buscar por Pessoa</label>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <select id="personSearchSelect" className="form-select">
+                                    <option value="">Selecione...</option>
+                                    {people.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                </select>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={async () => {
+                                        const pid = document.getElementById('personSearchSelect').value;
+                                        if (!pid) return alert('Selecione uma pessoa');
+                                        await handleSearchActive(null, pid);
+                                    }}
+                                >
+                                    Buscar Itens
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="form-group">
                 <label className="form-label">Tipo de Movimentação</label>
