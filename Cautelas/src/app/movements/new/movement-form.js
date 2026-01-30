@@ -377,7 +377,7 @@ export default function MovementForm({ assets, people }) {
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <label className="btn" style={{ flex: 1, border: '2px solid', borderColor: type === 'OUT' ? 'var(--rf-blue)' : 'var(--gray-300)', backgroundColor: type === 'OUT' ? 'var(--rf-blue)' : 'white', color: type === 'OUT' ? 'white' : 'var(--gray-600)', justifyContent: 'center' }}>
                         <input type="radio" name="type" value="OUT" checked={type === 'OUT'} onChange={(e) => { setType(e.target.value); setSelectedAssets([]); }} style={{ display: 'none' }} />
-                        Retirada (Saída)
+                        Cautela (Saída)
                     </label>
                     <label className="btn" style={{ flex: 1, border: '2px solid', borderColor: type === 'IN' ? 'var(--rf-gold)' : 'var(--gray-300)', backgroundColor: type === 'IN' ? 'var(--rf-gold)' : 'white', color: type === 'IN' ? 'white' : 'var(--gray-600)', justifyContent: 'center' }}>
                         <input type="radio" name="type" value="IN" checked={type === 'IN'} onChange={(e) => { setType(e.target.value); setSelectedAssets([]); }} style={{ display: 'none' }} />
@@ -430,7 +430,7 @@ export default function MovementForm({ assets, people }) {
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <input placeholder="Código" value={newAssetData.code} onChange={(e) => setNewAssetData({ ...newAssetData, code: e.target.value })} className="form-input" style={{ width: '150px' }} />
                                 <input placeholder="Descrição" value={newAssetData.description} onChange={(e) => setNewAssetData({ ...newAssetData, description: e.target.value })} className="form-input" style={{ flex: 1 }} />
-                                <button type="button" onClick={handleAddNew} disabled={loading} className="btn btn-secondary">Add</button>
+                                <button type="button" onClick={handleAddNew} disabled={loading} className="btn btn-success">ADICIONAR</button>
                             </div>
                         ) : (
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -440,7 +440,7 @@ export default function MovementForm({ assets, people }) {
                                         <option key={asset.id} value={asset.id}>{asset.code} - {asset.description}</option>
                                     ))}
                                 </select>
-                                <button type="button" onClick={handleAddCurrent} disabled={!currentAssetId} className="btn btn-secondary">Add</button>
+                                <button type="button" onClick={handleAddCurrent} disabled={!currentAssetId} className="btn btn-success">ADICIONAR</button>
                             </div>
                         )}
                         {filteredAssets.length === 0 && !isNewAsset && (

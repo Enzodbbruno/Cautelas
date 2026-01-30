@@ -211,6 +211,19 @@ a {
   color: white;
 }
 
+.btn-success {
+  background-color: #15803d;
+  /* Green 700 */
+  color: white;
+  border: 1px solid transparent;
+}
+
+.btn-success:hover {
+  background-color: #166534;
+  /* Green 800 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Forms */
 .form-group {
   margin-bottom: 1.5rem;
