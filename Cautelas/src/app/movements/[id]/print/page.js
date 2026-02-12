@@ -50,11 +50,11 @@ export default async function PrintPage({ params }) {
             <div className="paper">
                 <header className="doc-header">
                     <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <svg width="80" height="80" viewBox="0 0 100 100" style={{ margin: '0 auto 1rem' }}>
-                            <circle cx="50" cy="50" r="45" fill="none" stroke="#003366" strokeWidth="3" />
-                            <text x="50" y="45" fontSize="24" fontWeight="bold" fill="#003366" textAnchor="middle">RF</text>
-                            <text x="50" y="65" fontSize="10" fill="#003366" textAnchor="middle">BRASIL</text>
-                        </svg>
+                        <img
+                            src="/logo-receita.png"
+                            alt="Receita Federal"
+                            style={{ width: '120px', height: 'auto', margin: '0 auto 1rem', display: 'block' }}
+                        />
                         <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Ministério da Fazenda</h1>
                         <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Secretaria da Receita Federal do Brasil</h2>
                         <div style={{ width: '100px', height: '1px', background: 'black', margin: '0.5rem auto' }}></div>
