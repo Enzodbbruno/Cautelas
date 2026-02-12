@@ -105,14 +105,16 @@ export default async function PrintPage({ params }) {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6rem', gap: '3rem' }}>
                         <div style={{ flex: 1, textAlign: 'center' }}>
-                            <div style={{ borderTop: '2px solid black', paddingTop: '0.75rem', minHeight: '80px' }}></div>
-                            <p style={{ fontWeight: 'bold', marginTop: '0.5rem' }}>Responsável pela Entrega</p>
-                            <p style={{ fontSize: '0.85rem', color: '#555' }}>(Gestão de Patrimônio)</p>
+                            <div style={{ borderTop: '2px solid black', paddingTop: '0.5rem' }}>
+                                <p style={{ fontWeight: 'bold', marginTop: '0.25rem' }}>Responsável pela Entrega</p>
+                                <p style={{ fontSize: '0.85rem', color: '#555' }}>(Gestão de Patrimônio)</p>
+                            </div>
                         </div>
                         <div style={{ flex: 1, textAlign: 'center' }}>
-                            <div style={{ borderTop: '2px solid black', paddingTop: '0.75rem', minHeight: '80px' }}></div>
-                            <p style={{ fontWeight: 'bold', marginTop: '0.5rem' }}>{primaryMvt.person.name}</p>
-                            <p style={{ fontSize: '0.85rem', color: '#555' }}>Servidor Responsável</p>
+                            <div style={{ borderTop: '2px solid black', paddingTop: '0.5rem' }}>
+                                <p style={{ fontWeight: 'bold', marginTop: '0.25rem' }}>{primaryMvt.person.name}</p>
+                                <p style={{ fontSize: '0.85rem', color: '#555' }}>Servidor Responsável</p>
+                            </div>
                         </div>
                     </div>
 
