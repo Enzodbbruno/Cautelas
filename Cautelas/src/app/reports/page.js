@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import prisma from '@/lib/prisma';
 import ReportFilters from './report-filters';
+import ReportsClient from './reports-client';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,52 +55,7 @@ export default async function ReportsPage({ searchParams }) {
             {/* Filter Form - Client Component */}
             <ReportFilters people={people} assets={assets} initialParams={resolvedSearchParams} />
 
-            <div className="card">
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr style={{ borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
-                            <th style={{ padding: '0.75rem' }}>Termo</th>
-                            <th style={{ padding: '0.75rem' }}>Data</th>
-                            <th style={{ padding: '0.75rem' }}>Tipo</th>
-                            <th style={{ padding: '0.75rem' }}>Bem</th>
-                            <th style={{ padding: '0.75rem' }}>Pessoa</th>
-                            <th style={{ padding: '0.75rem' }}>Origem &gt; Destino</th>
-                            <th style={{ padding: '0.75rem' }}>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {movements.length === 0 ? (
-                            <tr><td colSpan="7" style={{ padding: '2rem', textAlign: 'center' }}>Nenhum registro encontrado.</td></tr>
-                        ) : (
-                            movements.map(m => (
-                                <tr key={m.id} style={{ borderBottom: '1px solid var(--border)', backgroundColor: m.isActive ? 'transparent' : '#f9fafb', opacity: m.isActive ? 1 : 0.7 }}>
-                                    <td style={{ padding: '0.75rem', fontWeight: 'bold' }}>{m.termYear}/{m.termNumber}</td>
-                                    <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>{new Date(m.movementDate).toLocaleDateString('pt-BR')}</td>
-                                    <td style={{ padding: '0.75rem' }}>
-                                        <span style={{
-                                            padding: '0.2rem 0.5rem',
-                                            borderRadius: '4px',
-                                            fontSize: '0.75rem',
-                                            backgroundColor: m.type === 'OUT' ? '#fee2e2' : '#dcfce7',
-                                            color: m.type === 'OUT' ? '#991b1b' : '#166534'
-                                        }}>
-                                            {m.type === 'OUT' ? 'Saída' : 'Entrada'}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>{m.asset.code}</td>
-                                    <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>{m.person.name}</td>
-                                    <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>{m.originSector} &gt; {m.destSector}</td>
-                                    <td style={{ padding: '0.75rem' }}>
-                                        <Link href={`/movements/${m.id}/print`} className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', border: '1px solid var(--border)' }}>
-                                            Ver Termo
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            <ReportsClient initialMovements={movements} />
         </div>
     );
 }
