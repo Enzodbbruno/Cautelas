@@ -103,14 +103,16 @@ export default async function PrintPage({ params }) {
                             : 'Declaro ter devolvido o(s) material(is) acima discriminado(s) nas condições em que se encontra(m).'}
                     </p>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem', gap: '2rem' }}>
-                        <div style={{ flex: 1, textAlign: 'center', borderTop: '1px solid black', paddingTop: '0.5rem' }}>
-                            <p>Responsável pela Entrega</p>
-                            <p style={{ fontSize: '0.8rem' }}>(Gestão de Patrimônio)</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6rem', gap: '3rem' }}>
+                        <div style={{ flex: 1, textAlign: 'center' }}>
+                            <div style={{ borderTop: '2px solid black', paddingTop: '0.75rem', minHeight: '80px' }}></div>
+                            <p style={{ fontWeight: 'bold', marginTop: '0.5rem' }}>Responsável pela Entrega</p>
+                            <p style={{ fontSize: '0.85rem', color: '#555' }}>(Gestão de Patrimônio)</p>
                         </div>
-                        <div style={{ flex: 1, textAlign: 'center', borderTop: '1px solid black', paddingTop: '0.5rem' }}>
-                            <p>{primaryMvt.person.name}</p>
-                            <p style={{ fontSize: '0.8rem' }}>Servidor Responsável</p>
+                        <div style={{ flex: 1, textAlign: 'center' }}>
+                            <div style={{ borderTop: '2px solid black', paddingTop: '0.75rem', minHeight: '80px' }}></div>
+                            <p style={{ fontWeight: 'bold', marginTop: '0.5rem' }}>{primaryMvt.person.name}</p>
+                            <p style={{ fontSize: '0.85rem', color: '#555' }}>Servidor Responsável</p>
                         </div>
                     </div>
 
