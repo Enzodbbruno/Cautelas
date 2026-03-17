@@ -23,10 +23,14 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Name is required' }, { status: 400 });
         }
 
+        // Handle empty CPF string - set to undefined so Prisma handles it properly 
+        // and doesn't trigger unique constraint on empty strings
+        const processedCpf = cpf && cpf.trim() !== '' ? cpf.trim() : undefined;
+
         const person = await prisma.person.create({
             data: {
                 name,
-                cpf,
+                cpf: processedCpf,
                 sector,
             },
         });
@@ -34,7 +38,7 @@ export async function POST(request) {
         return NextResponse.json(person, { status: 201 });
     } catch (error) {
         if (error.code === 'P2002') {
-            return NextResponse.json({ error: 'CPF already exists' }, { status: 409 });
+            return NextResponse.json({ error: 'Já existe uma pessoa cadastrada com esse CPF/Matrícula' }, { status: 409 });
         }
         return NextResponse.json({ error: 'Failed to create person' }, { status: 500 });
     }

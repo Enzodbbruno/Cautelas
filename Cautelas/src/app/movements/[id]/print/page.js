@@ -49,28 +49,28 @@ export default async function PrintPage({ params }) {
             {/* Print Interface */}
             <div className="paper">
                 <header className="doc-header">
-                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
                         <img
                             src="/logo-receita.png"
                             alt="Receita Federal"
-                            style={{ width: '120px', height: 'auto', margin: '0 auto 1rem', display: 'block' }}
+                            style={{ width: '100px', height: 'auto', margin: '0 auto 0.5rem', display: 'block' }}
                         />
-                        <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Ministério da Fazenda</h1>
-                        <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Secretaria da Receita Federal do Brasil</h2>
+                        <h1 style={{ fontSize: '1.2rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Ministério da Fazenda</h1>
+                        <h2 style={{ fontSize: '1.05rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Secretaria da Receita Federal do Brasil</h2>
                         <div style={{ width: '100px', height: '1px', background: 'black', margin: '0.5rem auto' }}></div>
-                        <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '1rem' }}>{termTitle}</h3>
-                        <p style={{ marginTop: '0.5rem' }}>Nº {termNumberFull}</p>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '0.75rem' }}>{termTitle}</h3>
+                        <p style={{ marginTop: '0.25rem' }}>Nº {termNumberFull}</p>
                     </div>
                 </header>
 
                 <main className="doc-content" style={{ lineHeight: '1.6', textAlign: 'justify' }}>
-                    <p style={{ marginBottom: '1.5rem' }}>
+                    <p style={{ marginBottom: '1rem' }}>
                         Pelo presente termo, a unidade <strong>{primaryMvt.originSector}</strong>,
                         {primaryMvt.type === 'OUT' ? ' entrega ' : ' recebe de volta '}
                         ao servidor(a) abaixo identificado, o(s) bem(ns) patrimonial(is) descrito(s) a seguir:
                     </p>
 
-                    <table className="doc-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem' }}>
+                    <table className="doc-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem' }}>
                         <thead>
                             <tr style={{ background: '#f0f0f0' }}>
                                 <th style={{ border: '1px solid black', padding: '0.5rem', fontWeight: 'bold', width: '20%' }}>Patrimônio</th>
@@ -90,25 +90,25 @@ export default async function PrintPage({ params }) {
                     </table>
 
                     {primaryMvt.observation && (
-                        <div style={{ marginBottom: '2rem', border: '1px solid black', padding: '1rem' }}>
+                        <div style={{ marginBottom: '1.5rem', border: '1px solid black', padding: '0.75rem' }}>
                             <p><strong>Observações:</strong> {primaryMvt.observation}</p>
                         </div>
                     )}
 
-                    <div style={{ marginBottom: '2rem' }}>
+                    <div style={{ marginBottom: '1.5rem' }}>
                         <p><strong>Dados do Servidor:</strong></p>
                         <p>Nome: {primaryMvt.person.name}</p>
                         <p>CPF/Matrícula: {primaryMvt.person.cpf || 'Não informado'}</p>
                         <p>Setor de Lotação: {primaryMvt.person.sector || 'Não informado'}</p>
                     </div>
 
-                    <p style={{ marginBottom: '3rem' }}>
+                    <p style={{ marginBottom: '2.5rem' }}>
                         {primaryMvt.type === 'OUT'
                             ? 'Declaro ter recebido o(s) material(is) acima discriminado(s) em perfeitas condições de uso e conservação, assumindo total responsabilidade pela sua guarda e zelo.'
                             : 'Declaro ter devolvido o(s) material(is) acima discriminado(s) nas condições em que se encontra(m).'}
                     </p>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6rem', gap: '3rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem', gap: '3rem' }}>
                         <div style={{ flex: 1, textAlign: 'center' }}>
                             <div style={{ borderTop: '2px solid black', paddingTop: '0.5rem' }}>
                                 <p style={{ fontWeight: 'bold', marginTop: '0.25rem' }}>Responsável pela Entrega</p>
@@ -123,7 +123,7 @@ export default async function PrintPage({ params }) {
                         </div>
                     </div>
 
-                    <p style={{ textAlign: 'center', marginTop: '3rem', fontSize: '0.8rem' }}>
+                    <p style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.8rem' }}>
                         Data: {new Date(primaryMvt.movementDate).toLocaleDateString('pt-BR')}
                     </p>
                 </main>
